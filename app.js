@@ -31,7 +31,7 @@ app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 
 // uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -43,7 +43,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 //local gamification database.
-mongoose.connect('mongodb://localhost/gamification', function(err) {
+mongoose.connect('mongodb://gamification:gamification1234@ds023373.mlab.com:23373/heroku_0v6grbpj', function(err) {
     if (err) {
         console.log(err);
     } else {
