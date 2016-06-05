@@ -43,7 +43,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 //local gamification database.
-mongoose.connect('mongodb://gamification:gamification1234@ds023373.mlab.com:23373/heroku_0v6grbpj', function(err) {
+mongoose.connect('mongodb://localhost/gamification', function(err) {
     if (err) {
         console.log(err);
     } else {
