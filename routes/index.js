@@ -4,13 +4,14 @@ var comment = require('../models/comments').Comments;
 var likeAndDislike = require('../models/likeAndDislike').LikeAndDislike;
 var likeAndDislikePosts = require('../models/likeAndDislikePosts').LikeAndDislikePosts;
 var rating = require("../models/rating").Rating;
-
+var badge = require("../models/badgesEarned").BadgesEarned;
 exports.loginPage = function(req, res) {
     res.render('index', {});
 };
 
 exports.createOrFindUser = function(req, res) {
     var user = req.body;
+    var response = res;
     //remote gis database
     var remote_user = [];
     var address = 'postgresql://socialgaming:fgK7d%Q<!zmbAd2@131.159.52.86:5432/gis';
@@ -26,12 +27,13 @@ exports.createOrFindUser = function(req, res) {
                 db.query('select * from submission where user_id =${id}', result[0])
                     .then(function(result) {
                         no_submissions = result.length;
+                        console.log(no_submissions);
                         account.findOneAndUpdate({
                                 query: { pgis_id: id }
                             }, {
                                 update: {
                                     submissions: no_submissions,
-                                    image_url: req.body.image_url,
+                                    image_url: req.body.image_url
                                 }
                             })
                             .then(function(user) {
@@ -68,6 +70,7 @@ exports.createOrFindUser = function(req, res) {
                         console.log(error);
                     });
             } else {
+
                 var query = {
                         email: req.body.email
                     },
@@ -77,14 +80,14 @@ exports.createOrFindUser = function(req, res) {
                         given_name: req.body.give_name,
                         family_name: req.body.family_name,
                         image_url: req.body.image,
-                        points: no_submissions * 50,
+                        points: no_submissions,
                         submissions: no_submissions
                     },
                     options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
                 account.findOneAndUpdate(query, update, options, function(error, result) {
                     if (error) console.log(error);
-                    res.send(result);
+                    response.send(result);
                     // do something with the document
                 });
 
@@ -389,4 +392,196 @@ exports.likeAndDislikeSubmission = function(req, res) {
 
         // do something with the document
     });
+}
+
+
+exports.getAllUserRankings = function(req, res) {
+    var response = res;
+    var users = [];
+    var comments = [];
+    var likesPosts = [];
+    var likesSubmissions = [];
+    var ratings = [];
+    var overAllRanking = [];
+    var badges = [];
+    account.find({})
+        .then(function(result) {
+            users = result;
+        }).then(function() {
+            likeAndDislike.find({})
+                .then(function(result) {
+                    likesSubmissions = result;
+                }).then(function() {
+                    comment.find({})
+                        .then(function(result) {
+                            comments = result;
+                        }).then(function() {
+                            likeAndDislikePosts.find({})
+                                .then(function(result) {
+                                    likesPosts = result;
+                                }).then(function() {
+                                    rating.find({})
+                                        .then(function(result) {
+                                            ratings = result;
+                                        }).then(function() {
+                                            badge.find()
+                                                .then(function(result) {
+                                                    badges = result;
+                                                }).then(function() {
+                                                    var count_likes = 0;
+                                                    var count_post_likes = 0;
+                                                    var count_ratings = 0;
+                                                    var count_comments = 0;
+                                                    var badgesEarned = [];
+                                                    for (user in users) {
+                                                        for (l in likesSubmissions) {
+                                                            if (users[user]._id.equals(likesSubmissions[l].user_id)) {
+                                                                count_likes = count_likes + 1;
+                                                            }
+                                                        }
+                                                        for (c in comments) {
+                                                            if (users[user]._id.equals(comments[c].user_id)) {
+                                                                count_comments = count_comments + 1;
+                                                            }
+                                                        }
+                                                        for (lp in likesPosts) {
+                                                            if (users[user]._id.equals(likesPosts[lp].user_id)) {
+                                                                count_post_likes = count_post_likes + 1;
+                                                            }
+                                                        }
+                                                        for (r in ratings) {
+                                                            if (users[user]._id.equals(ratings[r].user_id)) {
+                                                                count_ratings = count_ratings + 1;
+                                                            }
+                                                        }
+
+                                                        for (b in badges) {
+                                                            if (users[user]._id.equals(badges[b].user_id)) {
+                                                                badgesEarned.push(badges[b].badge);
+                                                            }
+                                                        }
+
+                                                        var object = {
+                                                            "user": users[user],
+                                                            "likesSubmissions": count_likes,
+                                                            "comments": count_comments,
+                                                            "likesPosts": count_post_likes,
+                                                            "ratings": count_ratings,
+                                                            "badgesEarned": badgesEarned,
+                                                            "totalPoints": count_post_likes * 5 + count_likes * 5 + count_ratings * 10 + count_comments * 10 + users[user].submissions * 50,
+                                                        };
+                                                        overAllRanking.push(object);
+                                                    }
+                                                    res.send(overAllRanking);
+                                                })
+                                        });
+                                });
+                        });
+                });
+        });
 };
+
+
+
+
+exports.getUserRankings = function(req, res) {
+    var user_id = req.params.id;
+    var response = res;
+    var users = [];
+    var comments = [];
+    var likesPosts = [];
+    var likesSubmissions = [];
+    var ratings = [];
+    var overAllRanking = [];
+
+    account.find({ _id: user_id })
+        .then(function(result) {
+            users = result;
+        }).then(function() {
+            likeAndDislike.find({})
+                .then(function(result) {
+                    likesSubmissions = result;
+                }).then(function() {
+                    comment.find({})
+                        .then(function(result) {
+                            comments = result;
+                        }).then(function() {
+                            likeAndDislikePosts.find({})
+                                .then(function(result) {
+                                    likesPosts = result;
+                                }).then(function() {
+                                    rating.find({})
+                                        .then(function(result) {
+                                            ratings = result;
+                                        }).then(function() {
+                                            var count_likes = 0;
+                                            var count_post_likes = 0;
+                                            var count_ratings = 0;
+                                            var count_comments = 0;
+                                            console.log()
+                                            for (user in users) {
+                                                for (l in likesSubmissions) {
+                                                    if (users[user]._id.equals(likesSubmissions[l].user_id)) {
+                                                        count_likes = count_likes + 1;
+                                                    }
+                                                }
+                                                for (c in comments) {
+                                                    if (users[user]._id.equals(comments[c].user_id)) {
+                                                        count_comments = count_comments + 1;
+                                                    }
+                                                }
+                                                for (lp in likesPosts) {
+                                                    if (users[user]._id.equals(likesPosts[lp].user_id)) {
+                                                        count_post_likes = count_post_likes + 1;
+                                                    }
+                                                }
+                                                for (r in ratings) {
+                                                    if (users[user]._id.equals(ratings[r].user_id)) {
+                                                        count_ratings = count_ratings + 1;
+                                                    }
+                                                }
+                                                var object = {
+                                                    "user": users[user],
+                                                    "likesSubmissions": count_likes,
+                                                    "comments": count_comments,
+                                                    "likesPosts": count_post_likes,
+                                                    "ratings": count_ratings,
+                                                    "totalPoints": count_post_likes * 5 + count_likes * 5 + count_ratings * 10 + count_comments * 10 + users[user].submissions * 50,
+                                                };
+                                                overAllRanking.push(object);
+                                            }
+                                            res.send(overAllRanking);
+                                        });
+                                });
+                        });
+                });
+        });
+};
+
+
+exports.createBadge = function(req, res) {
+    badge.find({
+            $and: [
+                { user_id: req.body.user_id },
+                { badge: req.body.badge }
+            ]
+        })
+        .then(function(result) {
+            if (result.length != 0) {
+                res.send('available');
+            } else {
+                new badge(req.body).save().then(function() {
+                    res.send('newlycreated');
+                })
+            }
+        });
+};
+
+
+exports.getUserPgisId = function(req, res) {
+    account.find({ _id: req.params.id })
+        .then(function(result) {
+            console.log(result);
+            res.send(result[0]);
+        })
+}

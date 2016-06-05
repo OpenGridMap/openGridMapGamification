@@ -1,33 +1,4 @@
 var subApp = angular.module('subApp', ['ngAnimate', 'ngRoute', 'angularGrid', 'uiGmapgoogle-maps', 'serviceApp']);
-// subApp.config(function($httpProvider) {
-//     $httpProvider.interceptors.push('myHttpInterceptor');
-//     var spinnerFunction = function(data, headersGetter) {
-//         // todo start the spinner here
-//         //alert('start spinner');
-//         $('#mydiv').show();
-//         return data;
-//     };
-//     $httpProvider.defaults.transformRequest.push(spinnerFunction);
-// })
-
-// subApp.factory('myHttpInterceptor', function($q, $window) {
-//     return function(promise) {
-//         return promise.then(function(response) {
-//             // do something on success
-//             // todo hide the spinner
-//             //alert('stop spinner');
-//             $('#mydiv').hide();
-//             return response;
-
-//         }, function(response) {
-//             // do something on error
-//             // todo hide the spinner
-//             //alert('stop spinner');
-//             $('#mydiv').hide();
-//             return $q.reject(response);
-//         });
-//     };
-// });
 
 subApp.factory("userService", function() {
     var user = {};
@@ -41,7 +12,80 @@ subApp.factory("userService", function() {
 });
 
 
+subApp.controller('RankCtrl', ['$scope', '$http', '$window', '$timeout', function($scope, $http, $window, $timeout) {
 
+
+    $scope.calculateRanking = function() {
+        $.get('/getAllUserRankings', function(response) {
+            $scope.ranking = response;
+        });
+    };
+
+    $scope.calculateRanking();
+}]);
+
+function checkRanking(rank) {
+    var user_id = parseURL(window.location.href).pathname.split('/');
+    user_id = user_id[user_id.length - 1];
+    var message = '';
+    var obj = {};
+    if (rank[0].totalPoints > 50 && rank[0].totalPoints < 150) {
+        obj = { "user_id": user_id, "badge": "BEGINNERS" };
+        $.post('/createBadge', obj, function(response) {
+            if (response == 'newlycreated') {
+                message = 'CONGTRATULATIONS !!!! you have just earned the BEGINNERS badge ..';
+                var $toastContent = $('<span>' + message + '</span>');
+                Materialize.toast($toastContent, 5000);
+            }
+        });
+
+    }
+
+    if (rank[0].totalPoints > 150 && rank[0].totalPoints < 500) {
+        obj = { "user_id": user_id, "badge": "INTERMIDIATE" };
+        $.post('/createBadge', obj, function(response) {
+            if (response == 'newlycreated') {
+                message = 'CONGTRATULATIONS !!!! you have just earned the INTERMIDIATE badge ..';
+                var $toastContent = $('<span>' + message + '</span>');
+                Materialize.toast($toastContent, 5000);
+            }
+        });
+    }
+
+    if (rank[0].totalPoints > 500 && rank[0].totalPoints < 1000) {
+        obj = { "user_id": user_id, "badge": "MASTER" };
+        $.post('/createBadge', obj, function(response) {
+            if (response == 'newlycreated') {
+                message = 'CONGTRATULATIONS !!!! you have just earned the MASTER badge ..';
+                var $toastContent = $('<span>' + message + '</span>');
+                Materialize.toast($toastContent, 5000);
+            }
+        });
+    }
+
+    if (rank[0].totalPoints > 1000 && rank[0].totalPoints < 5000) {
+        obj = { "user_id": user_id, "badge": "EXPERT" };
+        $.post('/createBadge', obj, function(response) {
+            if (response == 'newlycreated') {
+                message = 'CONGTRATULATIONS !!!! you have just earned the EXPERT badge ..';
+                var $toastContent = $('<span>' + message + '</span>');
+                Materialize.toast($toastContent, 5000);
+            }
+        });
+    }
+
+    if (rank[0].totalPoints > 5000) {
+        $.post('/createBadge', obj, function(response) {
+            obj = { "user_id": user_id, "badge": "OUT OF THIS WORLD" };
+            if (response == 'newlycreated') {
+                message = 'CONGTRATULATIONS !!!! you have just earned the OUT OF THIS WORLD badge ..';
+                var $toastContent = $('<span>' + message + '</span>');
+                Materialize.toast($toastContent, 5000);
+            }
+        });
+
+    }
+};
 
 subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', function($scope, $http, $window, $timeout) {
     var shadow_copy = [];
@@ -55,6 +99,9 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
     $scope.likeMap = new Object();
     $scope.postMap = new Object();
     $scope.likePostMap = new Object();
+
+    var user_id = parseURL(window.location.href).pathname.split('/');
+    user_id = user_id[user_id.length - 1];
 
     // check if user rated before or not to display correctly
     $scope.isRated = function(id) {
@@ -70,6 +117,11 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
         return false;
 
     };
+
+    // check if any badges earned 
+    $.get('/getAllUserRankings', function(response) {
+        checkRanking(response);
+    });
     // get all submissions from pgis
     $.get('http://vmjacobsen39.informatik.tu-muenchen.de/submissions', function(response) {
         $scope.submissions = response;
@@ -111,7 +163,18 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
 
                     }
                     shadow_copy = $scope.submissions_pos;
+                }).then(function() {
+                    $.get('/getUserPgisId/' + user_id, function(response) {
+                        if (response) {
+                            for (sub in $scope.submissions_pos) {
+                                if (response.pgis_id == $scope.submissions_pos[sub].submission.user_id) {
+                                    $scope.my_submissions.push($scope.submissions_pos[sub]);
+                                }
+                            }
+                        }
+                    });
                 });
+
             });
         });
     });
@@ -140,8 +203,6 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
     };
 
     //rating 
-    var user_id = parseURL(window.location.href).pathname.split('/');
-    user_id = user_id[user_id.length - 1];
     $scope.userRatings = [];
 
     //get all user ratings from system    
@@ -168,7 +229,12 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
             "dislikes": parseInt(dislikes.text())
         };
 
-        $.post('/likeAndDislikeSubmission', obj, function(response) {});
+        $.post('/likeAndDislikeSubmission', obj, function(response) {
+            // check if any badges earned 
+            $.get('/getAllUserRankings', function(response) {
+                checkRanking(response);
+            });
+        });
     }
 
     $scope.incDislike = function(id) {
@@ -182,7 +248,11 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
             "dislikes": parseInt(dislikes.text())
         };
 
-        $.post('/likeAndDislikeSubmission', obj, function(response) {});
+        $.post('/likeAndDislikeSubmission', obj, function(response) {
+            $.get('/getAllUserRankings', function(response) {
+                checkRanking(response);
+            });
+        });
     }
 
     // init like and dislike widgets for posts
@@ -197,7 +267,12 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
             "dislikes": parseInt(dislikes.text())
         };
 
-        $.post('/likeAndDislikePost', obj, function(response) {});
+        $.post('/likeAndDislikePost', obj, function(response) {
+            // check if any badges earned 
+            $.get('/getAllUserRankings', function(response) {
+                checkRanking(response);
+            });
+        });
     }
 
     $scope.incDislikePost = function(id) {
@@ -211,7 +286,12 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
             "dislikes": parseInt(dislikes.text())
         };
 
-        $.post('/likeAndDislikePost', obj, function(response) {});
+        $.post('/likeAndDislikePost', obj, function(response) {
+            // check if any badges earned 
+            $.get('/getAllUserRankings', function(response) {
+                checkRanking(response);
+            });
+        });
     }
 
     //calcuate the overall rating of a submission
@@ -246,6 +326,11 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
 
                 }).then(function() {
                     $scope.isRated(id);
+                }).then(function() {
+                    // check if any badges earned 
+                    $.get('/getAllUserRankings', function(response) {
+                        checkRanking(response);
+                    });
                 });
             });
         });
@@ -283,6 +368,11 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
 
                 }
             }
+        }).then(function() {
+            // check if any badges earned 
+            $.get('/getAllUserRankings', function(response) {
+                checkRanking(response);
+            });
         });
     }
 }]);
@@ -375,4 +465,15 @@ subApp.directive('starRating', function() {
             };
         }
     };
+});
+subApp.directive('onErrorSrc', function() {
+    return {
+        link: function(scope, element, attrs) {
+            element.bind('error', function() {
+                if (attrs.src != attrs.onErrorSrc) {
+                    attrs.$set('src', attrs.onErrorSrc);
+                }
+            });
+        }
+    }
 });

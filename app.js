@@ -81,5 +81,11 @@ app.post('/likeAndDislikeSubmission', index.likeAndDislikeSubmission);
 app.post('/likeAndDislikePost', index.likeAndDislikePost);
 
 
+app.post('/createBadge', index.createBadge);
+
+app.get('/getUserPgisId/:id',index.getUserPgisId);
+
+app.get('/getAllUserRankings', index.getAllUserRankings);
+app.get('/getUserRankings/:id', index.getUserRankings);
 
 module.exports = app;
