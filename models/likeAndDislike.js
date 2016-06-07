@@ -4,6 +4,7 @@ var ObjectId = Schema.ObjectId;
 
 var likeAndDislikeSchema = new Schema({
     submission_id: Number,
+    pgis_owner_id : Number,
     user_id: ObjectId,
     likes: { type: Number, default: 0 },
     dislikes: { type: Number, default: 0 }

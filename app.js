@@ -15,8 +15,16 @@ var mongoose = require('mongoose');
 var crate = require('mongoose-crate');
 var LocalFS = require('mongoose-crate-localfs');
 
-var index = require('./routes/index');
-var home = require('./routes/home')
+var pageRouter = require('./routes/pageRouter');
+var account = require('./routes/account');
+var badges = require('./routes/badges');
+var comments = require('./routes/comments');
+var postLikes = require('./routes/postLikes');
+var ranking = require('./routes/ranking');
+var rating = require('./routes/rating');
+var submissionLikes = require('./routes/submissionLikes');
+var submissions = require('./routes/submissions');
+
 var multer = require('multer');
 
 var pooled = require('pooled-pg');
@@ -60,32 +68,34 @@ app.use(passport.session());
 
 
 
-app.get('/', index.loginPage);
-app.get('/home/:id', home.home);
+app.get('/', pageRouter.loginPage);
+app.get('/home/:id', pageRouter.home);
 
-app.post('/createOrFindUser', index.createOrFindUser);
-app.post('/createOrFindSubmissions', index.createOrFindSubmissions);
-app.post('/createSubmissionPost', index.createSubmissionPost);
+app.post('/createOrFindUser', account.createOrFindUser);
+app.get('/getUserPgisId/:id',account.getUserPgisId);
+app.get('/getUserDetails', account.getUserDetails);
 
-app.get('/getUserDetails', index.getUserDetails);
-app.get('/getAllSubmissionRate/:id', index.getAllSubmissionRate);
-app.get('/getAverageSubmissionRate/:id', index.getAverageSubmissionRate);
+app.post('/createOrFindSubmissions', submissions.createOrFindSubmissions);
 
-app.get('/getAllSubmissionPosts', index.getAllSubmissionPosts);
-app.get('/getAllAverageSubmissionRate', index.getAllAverageSubmissionRate);
-app.get('/getAllLikesAndDislikes', index.getAllLikesAndDislikes);
-app.get('/getAllLikesAndDislikesPosts', index.getAllLikesAndDislikesPosts);
+app.post('/createSubmissionPost', comments.createSubmissionPost);
+app.get('/getAllSubmissionPosts', comments.getAllSubmissionPosts);
 
-app.post('/rateSubmission', index.rateSubmission);
-app.post('/likeAndDislikeSubmission', index.likeAndDislikeSubmission);
-app.post('/likeAndDislikePost', index.likeAndDislikePost);
+app.get('/getAllLikesAndDislikesPosts', postLikes.getAllLikesAndDislikesPosts);
+app.post('/likeAndDislikePost', postLikes.likeAndDislikePost);
+
+app.get('/getAllLikesAndDislikes', submissionLikes.getAllLikesAndDislikes);
+app.post('/likeAndDislikeSubmission', submissionLikes.likeAndDislikeSubmission);
+
+app.get('/getAllSubmissionRate/:id', rating.getAllSubmissionRate);
+app.get('/getAverageSubmissionRate/:id', rating.getAverageSubmissionRate);
+app.post('/rateSubmission', rating.rateSubmission);
+app.get('/getAllAverageSubmissionRate', rating.getAllAverageSubmissionRate);
 
 
-app.post('/createBadge', index.createBadge);
+app.post('/createBadge', badges.createBadge);
+	
 
-app.get('/getUserPgisId/:id',index.getUserPgisId);
-
-app.get('/getAllUserRankings', index.getAllUserRankings);
-app.get('/getUserRankings/:id', index.getUserRankings);
+app.get('/getAllUserRankings', ranking.getAllUserRankings);
+app.get('/getUserRankings/:id', ranking.getUserRankings);
 
 module.exports = app;

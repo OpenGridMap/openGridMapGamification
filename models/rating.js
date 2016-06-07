@@ -4,6 +4,7 @@ var ObjectId = Schema.ObjectId;
 
 var ratingSchema = new Schema({
     submission_id: Number,
+    pgis_owner_id : Number,
     user_id: ObjectId,
     rating: { type: Number, default: 1 }
 });

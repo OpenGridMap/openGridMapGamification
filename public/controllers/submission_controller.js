@@ -13,11 +13,12 @@ subApp.factory("userService", function() {
 
 
 subApp.controller('RankCtrl', ['$scope', '$http', '$window', '$timeout', function($scope, $http, $window, $timeout) {
-
+    $scope.ranking = [];
 
     $scope.calculateRanking = function() {
         $.get('/getAllUserRankings', function(response) {
             $scope.ranking = response;
+            //checkRanking($scope.ranking);
         });
     };
 
@@ -29,71 +30,93 @@ function checkRanking(rank) {
     user_id = user_id[user_id.length - 1];
     var message = '';
     var obj = {};
-    if (rank[0].totalPoints > 50 && rank[0].totalPoints < 150) {
-        obj = { "user_id": user_id, "badge": "BEGINNERS" };
-        $.post('/createBadge', obj, function(response) {
-            if (response == 'newlycreated') {
-                message = 'CONGTRATULATIONS !!!! you have just earned the BEGINNERS badge ..';
-                var $toastContent = $('<span>' + message + '</span>');
-                Materialize.toast($toastContent, 5000);
+    for (r in rank) {
+        if (rank[r].user._id == user_id) {
+            if (rank[r].totalPoints > 50 && rank[r].totalPoints < 150) {
+                obj = { "user_id": user_id, "badge": "BEGINNERS" };
+                $.post('/createBadge', obj, function(response) {
+                    if (response == 'newlycreated') {
+                        message = 'CONGTRATULATIONS !!!! you have just earned the BEGINNERS badge ..';
+                        var $toastContent = $('<span>' + message + '</span>');
+                        Materialize.toast($toastContent, 5000);
+                    }
+                });
+
             }
-        });
 
-    }
-
-    if (rank[0].totalPoints > 150 && rank[0].totalPoints < 500) {
-        obj = { "user_id": user_id, "badge": "INTERMIDIATE" };
-        $.post('/createBadge', obj, function(response) {
-            if (response == 'newlycreated') {
-                message = 'CONGTRATULATIONS !!!! you have just earned the INTERMIDIATE badge ..';
-                var $toastContent = $('<span>' + message + '</span>');
-                Materialize.toast($toastContent, 5000);
+            if (rank[r].totalPoints > 150 && rank[r].totalPoints < 500) {
+                obj = { "user_id": user_id, "badge": "INTERMIDIATE" };
+                $.post('/createBadge', obj, function(response) {
+                    if (response == 'newlycreated') {
+                        message = 'CONGTRATULATIONS !!!! you have just earned the INTERMIDIATE badge ..';
+                        var $toastContent = $('<span>' + message + '</span>');
+                        Materialize.toast($toastContent, 5000);
+                    }
+                });
             }
-        });
-    }
 
-    if (rank[0].totalPoints > 500 && rank[0].totalPoints < 1000) {
-        obj = { "user_id": user_id, "badge": "MASTER" };
-        $.post('/createBadge', obj, function(response) {
-            if (response == 'newlycreated') {
-                message = 'CONGTRATULATIONS !!!! you have just earned the MASTER badge ..';
-                var $toastContent = $('<span>' + message + '</span>');
-                Materialize.toast($toastContent, 5000);
+            if (rank[r].totalPoints > 500 && rank[r].totalPoints < 1000) {
+                obj = { "user_id": user_id, "badge": "MASTER" };
+                $.post('/createBadge', obj, function(response) {
+                    if (response == 'newlycreated') {
+                        message = 'CONGTRATULATIONS !!!! you have just earned the MASTER badge ..';
+                        var $toastContent = $('<span>' + message + '</span>');
+                        Materialize.toast($toastContent, 5000);
+                    }
+                });
             }
-        });
-    }
 
-    if (rank[0].totalPoints > 1000 && rank[0].totalPoints < 5000) {
-        obj = { "user_id": user_id, "badge": "EXPERT" };
-        $.post('/createBadge', obj, function(response) {
-            if (response == 'newlycreated') {
-                message = 'CONGTRATULATIONS !!!! you have just earned the EXPERT badge ..';
-                var $toastContent = $('<span>' + message + '</span>');
-                Materialize.toast($toastContent, 5000);
+            if (rank[r].totalPoints > 1000 && rank[r].totalPoints < 5000) {
+                obj = { "user_id": user_id, "badge": "EXPERT" };
+                $.post('/createBadge', obj, function(response) {
+                    if (response == 'newlycreated') {
+                        message = 'CONGTRATULATIONS !!!! you have just earned the EXPERT badge ..';
+                        var $toastContent = $('<span>' + message + '</span>');
+                        Materialize.toast($toastContent, 5000);
+                    }
+                });
             }
-        });
-    }
 
-    if (rank[0].totalPoints > 5000) {
-        $.post('/createBadge', obj, function(response) {
-            obj = { "user_id": user_id, "badge": "OUT OF THIS WORLD" };
-            if (response == 'newlycreated') {
-                message = 'CONGTRATULATIONS !!!! you have just earned the OUT OF THIS WORLD badge ..';
-                var $toastContent = $('<span>' + message + '</span>');
-                Materialize.toast($toastContent, 5000);
+            if (rank[r].totalPoints > 5000) {
+                $.post('/createBadge', obj, function(response) {
+                    obj = { "user_id": user_id, "badge": "OUT OF THIS WORLD" };
+                    if (response == 'newlycreated') {
+                        message = 'CONGTRATULATIONS !!!! you have just earned the OUT OF THIS WORLD badge ..';
+                        var $toastContent = $('<span>' + message + '</span>');
+                        Materialize.toast($toastContent, 5000);
+                    }
+                });
+
             }
-        });
-
+        }
     }
 };
 
+
 subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', function($scope, $http, $window, $timeout) {
+
+    $scope.distance = function(lat1, lon1, lat2, lon2, unit) {
+        var radlat1 = Math.PI * lat1 / 180
+        var radlat2 = Math.PI * lat2 / 180
+        var theta = lon1 - lon2
+        var radtheta = Math.PI * theta / 180
+        var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+        dist = Math.acos(dist)
+        dist = dist * 180 / Math.PI
+        dist = dist * 60 * 1.1515
+        if (unit == "K") { dist = dist * 1.609344 }
+        if (unit == "N") { dist = dist * 0.8684 }
+        return dist
+    };
     var shadow_copy = [];
     $scope.submissions = [];
+    $scope.my_submissions = [];
     $scope.submissions_pos = [];
 
     $scope.searchText = '';
     $scope.comment = '';
+
+    $scope.userHasSubmissions = false;
 
     $scope.rateMap = new Object();
     $scope.likeMap = new Object();
@@ -164,13 +187,18 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
                     }
                     shadow_copy = $scope.submissions_pos;
                 }).then(function() {
+                    var foundItems = [];
                     $.get('/getUserPgisId/' + user_id, function(response) {
                         if (response) {
                             for (sub in $scope.submissions_pos) {
                                 if (response.pgis_id == $scope.submissions_pos[sub].submission.user_id) {
-                                    $scope.my_submissions.push($scope.submissions_pos[sub]);
+                                    foundItems.push($scope.submissions_pos[sub]);
                                 }
                             }
+                            $scope.$apply(function() {
+
+                                $scope.my_submissions = [1, 3, 4];
+                            });
                         }
                     });
                 });
@@ -193,8 +221,15 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
         } else {
             for (var sp in $scope.submissions_pos) {
                 var tag = $scope.submissions_pos[sp].submission.points[0].properties.tags.power_element_tags[0],
-                    user = $scope.submissions_pos[sp].submission.user;
-                if ((tag.indexOf($scope.searchText) != -1) || (user.indexOf($scope.searchText) != -1)) {
+                    user = $scope.submissions_pos[sp].submission.user,
+                    latlng = $scope.searchText.split(" ");
+                if (latlng.length > 1) {
+                    var distance = $scope.distance(latlng[0], latlng[1], $scope.submissions_pos[sp].submission.points[0].latlng[0], $scope.submissions_pos[sp].submission.points[0].latlng[1], 'K');
+                    //round to 3 decimal places
+                    if ((Math.round(distance * 1000) / 1000) <= 50) {
+                        foundItems.push($scope.submissions_pos[sp]);
+                    }
+                } else if ((tag.indexOf($scope.searchText) != -1) || (user.indexOf($scope.searchText) != -1)) {
                     foundItems.push($scope.submissions_pos[sp]);
                 }
             }
@@ -218,12 +253,13 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
             });
 
     // init like and dislike widgets for submissions
-    $scope.incLike = function(id) {
+    $scope.incLike = function(id, owner_id) {
         var likes = $('#like-' + id);
         var dislikes = $('#dislike-' + id);
         likes.text(parseInt(likes.text()) + 1);
         var obj = {
             "submission_id": id,
+            "pgis_owner_id": owner_id,
             "user_id": user_id,
             "likes": parseInt(likes.text()),
             "dislikes": parseInt(dislikes.text())
@@ -237,12 +273,13 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
         });
     }
 
-    $scope.incDislike = function(id) {
+    $scope.incDislike = function(id, owner_id) {
         var likes = $('#like-' + id);
         var dislikes = $('#dislike-' + id);
         dislikes.text(parseInt(dislikes.text()) - 1);
         var obj = {
             "submission_id": id,
+            "pgis_owner_id": owner_id,
             "user_id": user_id,
             "likes": parseInt(likes.text()),
             "dislikes": parseInt(dislikes.text())
@@ -303,8 +340,9 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
     }
 
     //save athe rate of a submission by a user
-    $scope.rate = function(param, id) {
+    $scope.rate = function(param, id, owner_id) {
         var rating_object = {
+            "pgis_owner_id": owner_id,
             "submission_id": id,
             "rating": param,
             "user_id": user_id
