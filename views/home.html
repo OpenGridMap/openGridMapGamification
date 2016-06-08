@@ -112,11 +112,10 @@ filter: grayscale(100%);">
                                             <div> <span class="label label-primary ">Star Rating {{sp.rating}}                               Comments:{{sp.posts.length}}</span>
                                             </div>
                                         </div>
-                                        <span class="badge">LAT:{{sp.submission.points[0].latlng[0]}} LNG:{{sp.submission.points[0].latlng[1]}} </span>
+                                        <span style="float:right" class="badge">LAT:{{sp.submission.points[0].latlng[0]}}   LNG:{{sp.submission.points[0].latlng[1]}} </span>
                                         &nbsp;
-                                        <span class="badge">{{sp.submission.points[0].properties.tags.timestamp}}</span>
                                         &nbsp;
-                                        <span class="badge">{{sp.submission.points[0].properties.tags.power_element_tags[0]}}</span>
+                                        <span style="float:right" class="badge">{{sp.submission.points[0].properties.tags.power_element_tags[0]}}</span>
                                     </p>
                                 </div>
                                 <div class="card-reveal ">
@@ -188,7 +187,7 @@ filter: grayscale(100%);">
                           Name
                         </th>
                         <th>
-                          Number of Submissions
+                          Number of Approved Submissions (PGIS)
                         </th>
                         <th>
                           Number of Ratings
