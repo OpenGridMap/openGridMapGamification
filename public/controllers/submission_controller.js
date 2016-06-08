@@ -166,6 +166,7 @@ subApp.controller('Sub_Ctrl', ['$scope', '$http', '$window', '$timeout', functio
                             "likes": $scope.likeMap[$scope.submissions[s].id] ? $scope.likeMap[$scope.submissions[s].id].likes : 0,
                             "dislikes": $scope.likeMap[$scope.submissions[s].id] ? $scope.likeMap[$scope.submissions[s].id].dislikes : 0,
                             "posts": $scope.postMap[$scope.submissions[s].id] ? $scope.postMap[$scope.submissions[s].id] : [],
+                            "submissionType": angular.isArray($scope.submissions[s].points[0].properties.tags.power_element_tags) ?$scope.submissions[s].points[0].properties.tags.power_element_tags[0] : $scope.submissions[s].points[0].properties.tags.power_element_tags,
                             "map": {
                                 center: {
                                     latitude: $scope.submissions[s].points[0].latlng[0],
